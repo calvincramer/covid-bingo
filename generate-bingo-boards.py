@@ -9,7 +9,9 @@ class Env:
     output_folder = os.path.join(script_dir, 'output')
     dictionary_folder = os.path.join(script_dir, 'dictionaries')
     config_folder = os.path.join(script_dir, 'config')
-    pass
+    header = 'Here are your bingo boards! Print this page out or open it in a text editor! Fill out the spaces as people say the words!'
+    footer = 'Generated with love using github.com/calvincramer/covid-bingo'
+    footer_html = 'Generated with love using <a href="https://github.com/calvincramer/covid-bingo">github.com/calvincramer/covid-bingo</a>'
 
 
 def empty_output_folder() -> None:
@@ -159,18 +161,15 @@ def board_to_string(board: list[list[str]]) -> tuple[str, int]:
 
 
 def board_strings_to_whole_file(board_strs: list[str], max_board_width: int) -> str:
-    header = 'Here are your bingo boards! Print this page out or open it in a text editor! Fill out the spaces as people say the words!'
-    footer = 'Generated with love using github.com/calvincramer/covid-bingo'
-
     def section_separator() -> str:
         return '\n\n\n'
 
     def board_header(board_name: object) -> str:
         return f'##### BOARD {str(board_name)} #####'
 
-    max_width = max(len(header), len(footer), max_board_width)
+    max_width = max(len(Env.header), len(Env.footer), max_board_width)
     s = ''
-    s += f'{header:^{max_width}}'
+    s += f'{Env.header:^{max_width}}'
     s += section_separator()
     for i, board_str in enumerate(board_strs):
         # Board header
@@ -180,13 +179,77 @@ def board_strings_to_whole_file(board_strs: list[str], max_board_width: int) -> 
         for board_line in board_lines:
             s += f'{board_line:^{max_width}}\n'
         s += section_separator()
-    s += f'{footer:^{max_width}}\n'
+    s += f'{Env.footer:^{max_width}}\n'
     return s
 
 
-def board_to_html(board: list[list[str]]) -> str:
+def boards_to_html(boards: list[list[list[str]]]) -> str:
     """ Board to html page """
-    pass
+    # Read template file
+    template = open(os.path.join(Env.script_dir, 'template.html'), 'r').read()
+
+    def get_tables() -> str:
+        text = ''
+        for i, board in enumerate(boards):
+            text += f'<div><table><caption>Board {i+1}</caption>\n'
+            for row_num, row in enumerate(board):
+                text += '<tr>\n'
+                for col_num, elm in enumerate(row):
+                    text += f'<td><button id="t{i}r{row_num}c{col_num}">{elm}</button></td>\n'
+                text += '</tr>\n'
+            text += '</table></div>\n'
+        return text
+
+    def get_js_buttons() -> str:
+        text = """
+        var func_click = function() {
+            var button_pressed = document.getElementById(this.id);
+            if (button_pressed.style.backgroundColor == "rgb(0, 137, 0)") {
+                button_pressed.style.backgroundColor = "black";
+                button_pressed.style.color = "white";
+            }
+            else {
+                button_pressed.style.backgroundColor = "rgb(0, 137, 0)";
+                button_pressed.style.color = "white";
+            }
+        }
+        
+        """
+        for i, board in enumerate(boards):
+            for row_num, row in enumerate(board):
+                for col_num, elm in enumerate(row):
+                    text += f"document.getElementById('t{i}r{row_num}c{col_num}').onclick = func_click;"
+        return text
+
+    """
+    var func_click = function() {{
+            var button_pressed = document.getElementById(this.id);
+            if (button_pressed.style.backgroundColor == "rgb(0, 137, 0)") {{
+                button_pressed.style.backgroundColor = "black";
+                button_pressed.style.color = "white";
+            }}
+            else {{
+                button_pressed.style.backgroundColor = "rgb(0, 137, 0)";
+                button_pressed.style.color = "white";
+            }}
+        }}
+        document.getElementById('a1').onclick = func_click;
+        document.getElementById('2').onclick = func_click;
+        document.getElementById('3').onclick = func_click;
+        document.getElementById('4').onclick = func_click;
+        document.getElementById('5').onclick = func_click;
+        document.getElementById('6').onclick = func_click;
+        document.getElementById('7').onclick = func_click;
+        document.getElementById('8').onclick = func_click;
+        document.getElementById('9').onclick = func_click;
+    """
+
+    return template.format(
+        header=Env.header,
+        footer=Env.footer_html,
+        tables=get_tables(),
+        javascriptButtons=get_js_buttons(),
+    )
 
 
 def person_name_to_folder_name(name: str) -> str:
@@ -216,19 +279,24 @@ def generate_stuff_for_everyone(config: dict[str, object], dictionary: list[str]
 
         # Save board strings as text file
         board_strings_whole = board_strings_to_whole_file(board_strings, max_board_width)
-        with open(f'{folder_name}_all_boards.txt', 'w') as fp:
+        file_name = os.path.join(folder_name + os.path.sep, f'{os.path.basename(folder_name)}_all_boards.txt')
+        with open(file_name, 'w') as fp:
             fp.write(board_strings_whole)
 
         # Save boards as html files
+        html_text = boards_to_html(boards)
+        file_name = os.path.join(folder_name + os.path.sep, f'{os.path.basename(folder_name)}_all_boards.html')
+        with open(file_name, 'w') as fp:
+            fp.write(html_text)
 
         # Generate email
+        # TODO
 
         for board, board_str in zip(boards, board_strings):
             print(board)
             print(board_str)
         print()
         pass
-
 
 
 def main():
