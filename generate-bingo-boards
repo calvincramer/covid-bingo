@@ -289,21 +289,17 @@ def generate_stuff_for_everyone(config: dict[str, object], dictionary: list[str]
         with open(file_name, 'w') as fp:
             fp.write(html_text)
 
-        # Generate email
-        # TODO
-
-        for board, board_str in zip(boards, board_strings):
-            print(board)
-            print(board_str)
-        print()
-        pass
+        # Generate / send email
+        # TODO: future work
 
 
 def main():
+    print('Generating...')
     args = parse_cmd_args()
     config = read_config_file(args)
     empty_output_folder()
     generate_stuff_for_everyone(config, read_dictionary(config))
+    print('Generated all files to "output" directory')
 
 
 if __name__ == '__main__':
