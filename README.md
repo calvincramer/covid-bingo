@@ -23,6 +23,9 @@ The output is given as plain text files, and as an interactive html page.
 
 # Or you can edit already existing default.dict and default-config.ini and use:
 ./generate-bingo-boards
+
+# If you have multiple python installations, use 3.9 or above directly, such as:
+python3.9 generate-bingo-boards
 ```
 
 * All files will be in the `output` directory, separated by person 

@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 import os
 from argparse import Namespace
+import sys
+
+major, minor, maint, _, _ = sys.version_info
+if major < 3 or (major == 3 and minor < 9):
+    print("Python 3.9 minimum required. You ran with:")
+    print(sys.version)
+    exit(1)
 
 
 class Env:
