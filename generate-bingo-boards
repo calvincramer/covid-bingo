@@ -211,16 +211,20 @@ def boards_to_html(boards: list[list[list[str]]]) -> str:
         text = """
         var func_click = function() {
             var button_pressed = document.getElementById(this.id);
-            if (button_pressed.style.backgroundColor == "rgb(0, 137, 0)") {
-                button_pressed.style.backgroundColor = "black";
-                button_pressed.style.color = "white";
+            if (button_pressed.classList.contains("selected")) {
+                button_pressed.classList.remove("selected");
             }
             else {
-                button_pressed.style.backgroundColor = "rgb(0, 137, 0)";
-                button_pressed.style.color = "white";
+				button_pressed.classList.add("selected");
             }
         }
-        
+        var toggle_dark = function() {
+            if (document.body.classList.contains("dark")) {
+                document.body.classList.remove("dark");
+            } else {
+                document.body.classList.add("dark");
+            }
+        }
         """
         for i, board in enumerate(boards):
             for row_num, row in enumerate(board):
